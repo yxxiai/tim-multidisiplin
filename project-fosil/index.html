@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOSIL - Informasi Suhu dan Klorofil</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* Header dan Navigasi */
+        header {
+            background: linear-gradient(135deg, #1a5f7a 0%, #159895 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #57C5B6;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://tse1.mm.bing.net/th/id/OIP.pD4Afc_RFJJGF028AsMlPgHaE8?rs=1&pid=ImgDetMain&o=7&rm=3');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 6rem 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #57C5B6;
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #159895;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Section Styling */
+        section {
+            padding: 5rem 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.2rem;
+            color: #1a5f7a;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 3px;
+            background-color: #57C5B6;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .section-title p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: #666;
+        }
+        
+        /* About Section */
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+        
+        .about-text {
+            flex: 1;
+        }
+        
+        .about-image {
+            flex: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .about-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Features Section */
+        .features {
+            background-color: #f0f5f9;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #57C5B6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #1a5f7a;
+        }
+        
+        /* Interactive Map Section */
+        .map-section {
+            background: linear-gradient(135deg, #1a5f7a 0%, #159895 100%);
+            color: white;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            margin-top: 2rem;
+        }
+        
+        #interactiveMap {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+        }
+        
+        .coordinates-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .coord-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .coord-card h4 {
+            color: #57C5B6;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Data Section */
+        .data-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #1a5f7a;
+            border-bottom: 3px solid #57C5B6;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .data-visualization {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .data-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .data-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .data-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .data-card-content {
+            padding: 1.5rem;
+        }
+        
+        .data-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #1a5f7a;
+        }
+        
+        /* Stories Section */
+        .stories {
+            background-color: #f0f5f9;
+        }
+        
+        .stories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .story-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .story-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #1a5f7a;
+        }
+        
+        /* Contact Section */
+        .contact-content {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        .contact-info {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .contact-form {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #1a5f7a;
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links h4 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #57C5B6;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .about-content,
+            .contact-content {
+                flex-direction: column;
+            }
+            
+            .data-tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .map-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">FOSIL</div>
+                <ul class="nav-links">
+                    <li><a href="#home">Beranda</a></li>
+                    <li><a href="#about">Tentang</a></li>
+                    <li><a href="#map">Peta Interaktif</a></li>
+                    <li><a href="#data">Data</a></li>
+                    <li><a href="#stories">Cerita</a></li>
+                    <li><a href="#contact">Kontak</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>SUHU DAN KLOROFIL LAUT UNTUK MASA DEPAN EKOSISTEM KITA</h1>
+            <p>Memahami kondisi laut melalui penyajian data ilmiah yang mudah dipahami, informatif, dan relevan bagi pendidikan, penelitian, dan konservasi.</p>
+            <a href="#map" class="btn">Lihat Peta Interaktif</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-title">
+                <h2>Apa itu Suhu dan Klorofil?</h2>
+                <p>Suhu permukaan laut (SST) dan klorofil-a adalah dua parameter penting yang menggambarkan aktivitas biologis dan kondisi fisik perairan.</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Di website ini, kami menyajikan data yang telah diolah, divisualisasikan, dan dijelaskan agar dapat dimanfaatkan oleh mahasiswa, peneliti, ataupun masyarakat umum.</p>
+                    <p>Portal ini dikembangkan oleh tim multidisiplin untuk menyajikan data suhu dan klorofil yang sudah diproses, lengkap dengan dokumentasi metodologi dan ringkasan ilmiah, interpretasi, dan ketersediaan data untuk keperluan akademik dan konservasi.</p>
+                </div>
+                <div class="about-image">
+                    <img src="https://cdn.grid.id/crop/0x0:0x0/x/photo/2022/01/12/waves-3473335_1920jpg-20220112035059.jpg" alt="Ilustrasi Data Laut">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Map Section -->
+    <section id="map" class="map-section">
+        <div class="container">
+            <div class="section-title">
+                <h2 style="color: white;">Peta Interaktif Lokasi Pengukuran</h2>
+                <p style="color: rgba(255,255,255,0.8);">Titik-titik koordinat pengukuran suhu dan klorofil di perairan Indonesia</p>
+            </div>
+            
+            <div class="map-container">
+                <div id="interactiveMap"></div>
+            </div>
+            
+            <div class="coordinates-info">
+                <div class="coord-card">
+                    <h4>📍 Titik 1 - Perairan Selatan Jawa</h4>
+                    <p><strong>Koordinat:</strong> 110.8870, -4.878782</p>
+                    <p><strong>Lokasi:</strong> Selat Sunda</p>
+                </div>
+                <div class="coord-card">
+                    <h4>📍 Titik 2 - Laut Jawa</h4>
+                    <p><strong>Koordinat:</strong> 107.261531, -4.769308</p>
+                    <p><strong>Lokasi:</strong> Laut Jawa Tengah</p>
+                </div>
+                <div class="coord-card">
+                    <h4>📍 Titik 3 - Selat Malaka</h4>
+                    <p><strong>Koordinat:</strong> 96.122191, 6.797864</p>
+                    <p><strong>Lokasi:</strong> Perairan Aceh</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Apa yang disajikan?</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Data Terolah & Valid</h3>
+                    <p>Sumber satelit yang telah melalui koreksi dan quality-check. Data dari berbagai lokasi strategis di perairan Indonesia.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🗺️</div>
+                    <h3>Peta Interaktif</h3>
+                    <p>Visualisasi data melalui peta interaktif dengan titik-titik koordinat pengukuran yang akurat.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌊</div>
+                    <h3>Untuk Semua Kalangan</h3>
+                    <p>Dapat dimanfaatkan oleh mahasiswa, peneliti, nelayan, dan masyarakat umum yang peduli dengan laut.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Section -->
+    <section id="data" class="data">
+        <div class="container">
+            <div class="section-title">
+                <h2>Halaman Data</h2>
+                <p>Pusat informasi suhu permukaan laut dan klorofil</p>
+            </div>
+            
+            <div class="data-tabs">
+                <button class="tab-btn active" data-tab="suhu">Suhu Permukaan Laut</button>
+                <button class="tab-btn" data-tab="klorofil">Klorofil</button>
+            </div>
+            
+            <!-- Suhu Tab Content -->
+            <div id="suhu" class="tab-content active">
+                <h3>Suhu: Nafas Hangat yang Menggerakkan Laut</h3>
+                <p>Suhu permukaan laut adalah parameter yang mempengaruhi hampir segalanya—angin, arus, cuaca, hingga kehidupan fitoplankton.</p>
+                
+                <div class="data-visualization">
+                    <div class="data-card">
+                        <img src="images/SUHU ACEH.png" alt="Suhu Permukaan Laut Aceh" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'">
+                        <div class="data-card-content">
+                            <h3>Suhu Permukaan Laut Aceh</h3>
+                            <p>Suhu permukaan laut Aceh relatif stabil di kisaran 28-32°C, dengan sedikit variasi. Stabilitas ini mendukung kondisi tropis.</p>
+                        </div>
+                    </div>
+                    <div class="data-card">
+                        <img src="images/SUHU JAWA.png" alt="Suhu Laut Jawa" onerror="this.src='https://images.unsplash.com/photo-1566024287286-457247b70311?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'">
+                        <div class="data-card-content">
+                            <h3>Suhu Laut Jawa</h3>
+                            <p>Suhu laut Jawa juga stabil, sedikit lebih rendah dibanding Aceh (sekitar 27-30°C). Perbedaan ini bisa terkait kedalaman dan arus laut.</p>
+                        </div>
+                    </div>
+                    <div class="data-card">
+                        <img src="images/SUHU NATUNA.png" alt="Suhu Natuna Utara" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'">
+                        <div class="data-card-content">
+                            <h3>Suhu Natuna Utara</h3>
+                            <p>Suhu Natuna Utara berada di kisaran 26-30°C, mirip Laut Jawa, menunjukkan pola tropis dengan sedikit variasi.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Klorofil Tab Content -->
+            <div id="klorofil" class="tab-content">
+                <h3>Klorofil: Warna Hijau yang Menjadi Fondasi Kehidupan Laut</h3>
+                <p>Klorofil-a adalah indikator keberlimpahan fitoplankton. Mereka mungkin kecil, tapi menjadi dasar dari seluruh jaring makanan laut.</p>
+                
+                <div class="data-visualization">
+                    <div class="data-card">
+                        <img src="images/KLOROFIL ACEH.png" alt="Klorofil-A Perairan Aceh" onerror="this.src='https://images.unsplash.com/photo-1551524164-6ca88aa4c33b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'">
+                        <div class="data-card-content">
+                            <h3>Klorofil-A Perairan Aceh</h3>
+                            <p>Konsentrasi Klorofil-A di perairan Aceh cenderung fluktuatif menunjukkan pengaruh siklus harian atau faktor lingkungan.</p>
+                        </div>
+                    </div>
+                    <div class="data-card">
+                        <img src="images/KLOROFIL JAWA.png" alt="Klorofil-A Laut Jawa" onerror="this.src='https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80'">
+                        <div class="data-card-content">
+                            <h3>Klorofil-A Laut Jawa</h3>
+                            <p>Konsentrasi Klorofil-A di Laut Jawa lebih rendah dan cenderung stabil, menunjukkan produktivitas sedang.</p>
+                        </div>
+                    </div>
+                    <div class="data-card">
+                        <img src="images/KLOROFIL NATUNA.png" alt="Klorofil-A Natuna Utara" onerror="this.src='https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'">
+                        <div class="data-card-content">
+                            <h3>Klorofil-A Natuna Utara</h3>
+                            <p>Konsentrasi Klorofil-A di Natuna Utara sedikit lebih tinggi dengan fluktuasi yang lebih jelas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stories Section -->
+    <section id="stories" class="stories">
+        <div class="container">
+            <div class="section-title">
+                <h2>Cerita di Balik Angka</h2>
+                <p>Ketika data menjadi cerita - Data bukan hanya deretan angka; ia adalah cerminan kondisi laut hari ini dan bayangan masa depannya.</p>
+            </div>
+            <div class="stories-grid">
+                <div class="story-card">
+                    <h3>Zona Produktif Baru</h3>
+                    <p>Menemukan zona produktif baru bagi nelayan lokal berdasarkan data klorofil dan suhu permukaan laut yang akurat.</p>
+                </div>
+                <div class="story-card">
+                    <h3>Penelitian Iklim</h3>
+                    <p>Memetakan perubahan suhu tahunan untuk penelitian iklim dan memahami dampak perubahan iklim pada ekosistem laut.</p>
+                </div>
+                <div class="story-card">
+                    <h3>Pendidikan Oseanografi</h3>
+                    <p>Membantu mahasiswa memahami dinamika oseanografi melalui data nyata dan visualisasi yang mudah dipahami.</p>
+                </div>
+                <div class="story-card">
+                    <h3>Pemetaan Habitat</h3>
+                    <p>Menjadi baseline untuk pemetaan habitat lamun & terumbu karang dan mendukung upaya konservasi laut berkelanjutan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Terlibat Bersama Kami</h2>
+                <p>Hubungi kami kapan saja untuk kolaborasi, pertanyaan data, atau dukungan terhadap proyek ini.</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Informasi Kontak</h3>
+                    <p><strong>Email:</strong> jinggapratamaarhanFfF@gmail.com</p>
+                    <p><strong>Fokus:</strong> Data suhu dan klorofil laut Indonesia</p>
+                    <p>Kami terbuka untuk kolaborasi penelitian, pertanyaan tentang data, atau diskusi mengenai konservasi laut Indonesia.</p>
+                </div>
+                <div class="contact-form">
+                    <h3>Kirim Pesan</h3>
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Nama</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subjek</label>
+                            <input type="text" id="subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Pesan</label>
+                            <textarea id="message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">Kirim Pesan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <div class="footer-logo">FOSIL</div>
+                    <p>Portal data suhu dan klorofil laut untuk pendidikan, penelitian, dan konservasi Indonesia.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="#home">Beranda</a></li>
+                        <li><a href="#about">Tentang</a></li>
+                        <li><a href="#map">Peta Interaktif</a></li>
+                        <li><a href="#data">Data</a></li>
+                        <li><a href="#stories">Cerita</a></li>
+                        <li><a href="#contact">Kontak</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Data</h4>
+                    <ul>
+                        <li><a href="#data">Suhu Permukaan Laut</a></li>
+                        <li><a href="#data">Klorofil</a></li>
+                        <li><a href="#stories">Studi Kasus</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 FOSIL - Informasi Suhu dan Klorofil. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map
+        function initMap() {
+            // Create map centered on Indonesia
+            const map = L.map('interactiveMap').setView([-2.5489, 118.0149], 5);
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Define coordinates
+            const coordinates = [
+                {
+                    lat: -4.878782,
+                    lng: 110.8870,
+                    title: "Titik 1 - Perairan Selatan Jawa",
+                    description: "Selat Sunda - Pengukuran Suhu dan Klorofil"
+                },
+                {
+                    lat: -4.769308,
+                    lng: 107.261531,
+                    title: "Titik 2 - Laut Jawa", 
+                    description: "Laut Jawa Tengah - Stasiun Monitoring"
+                },
+                {
+                    lat: 6.797864,
+                    lng: 96.122191,
+                    title: "Titik 3 - Selat Malaka",
+                    description: "Perairan Aceh - Area Konservasi Laut"
+                }
+            ];
+            
+            // Custom icon
+            const customIcon = L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+            
+            // Add markers to map
+            coordinates.forEach(coord => {
+                const marker = L.marker([coord.lat, coord.lng], {icon: customIcon})
+                    .addTo(map)
+                    .bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 10px 0; color: #1a5f7a;">${coord.title}</h4>
+                            <p style="margin: 5px 0;"><strong>Koordinat:</strong> ${coord.lng}, ${coord.lat}</p>
+                            <p style="margin: 5px 0;">${coord.description}</p>
+                            <div style="margin-top: 10px; padding: 8px; background: #f0f8ff; border-radius: 5px;">
+                                <small>📍 Klik untuk detail pengukuran</small>
+                            </div>
+                        </div>
+                    `);
+            });
+            
+            // Add measurement line (optional)
+            const latlngs = coordinates.map(coord => [coord.lat, coord.lng]);
+            const polyline = L.polyline(latlngs, {color: '#57C5B6', weight: 2, opacity: 0.7}).addTo(map);
+        }
+        
+        // Tab functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map
+            initMap();
+            
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    btn.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = btn.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Simple form handling
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Pesan berhasil dikirim! Terima kasih atas kontribusi Anda.');
+                form.reset();
+            });
+        });
+    </script>
+</body>
+</html>
